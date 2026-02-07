@@ -35,7 +35,6 @@ class LiveBoard(Board):
         super().__init__()
         self.surface = canvas
         self.selected_square = None
-        self.on_move_callback = on_move_callback
         self.render()
 
     def play_move(self, move):
