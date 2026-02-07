@@ -31,15 +31,17 @@ class Board(chess.Board):
 
 
 class LiveBoard(Board):
-    def __init__(self, canvas):
+    def __init__(self, canvas, on_move_callback=None):
         super().__init__()
         self.surface = canvas
         self.selected_square = None
+        self.on_move_callback = on_move_callback
         self.render()
 
     def play_move(self, move):
         if move in self.legal_moves:
             self.push(move)
+            self.on_move_callback()
             self.render()
 
     def render(self):
