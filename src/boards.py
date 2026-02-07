@@ -41,7 +41,8 @@ class LiveBoard(Board):
     def play_move(self, move):
         if move in self.legal_moves:
             self.push(move)
-            self.on_move_callback()
+            if self.on_move_callback is not None:
+                self.on_move_callback()
             self.render()
 
     def render(self):
