@@ -31,7 +31,7 @@ class Board(chess.Board):
 
 
 class LiveBoard(Board):
-    def __init__(self, canvas, on_move_callback=None):
+    def __init__(self, canvas):
         super().__init__()
         self.surface = canvas
         self.selected_square = None
@@ -41,8 +41,6 @@ class LiveBoard(Board):
     def play_move(self, move):
         if move in self.legal_moves:
             self.push(move)
-            if self.on_move_callback is not None:
-                self.on_move_callback()
             self.render()
 
     def render(self):
