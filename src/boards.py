@@ -130,12 +130,15 @@ class AnalysisBoard(LiveBoard):
                     row = 7 - chess.square_rank(move.to_square)
 
                     # Render the score for this move
+                    clamped_score = max(-3, min(3, self.scores[move.uci()]))
+                    color = "#{:02x}{:02x}00".format(int(255 * (1 - clamped_score / 3) / 2),
+                                                     int(255 * (1 + clamped_score / 3) / 2))
                     self.surface.create_text(
                         col * SQUARE_SIZE + 16,
                         row * SQUARE_SIZE + 12,
                         text=self.scores[move.uci()],
                         font=("Helvetica", 12, "bold"),
-                        fill="yellow"
+                        fill=color
                     )
 
     def play_move(self, move):
