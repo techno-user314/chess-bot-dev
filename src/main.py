@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from boards import Board, AnalysisBoard
+from boards import LiveBoard, AnalysisBoard
 from players import HumanPlayer
 from bot_loader import get_bots
 from ui_helper import *
@@ -32,7 +32,7 @@ class GameManager:
                                      row=1, column=i, padding=PADDING)
                     for i in range(3)]
         self.white_board = AnalysisBoard(canvases[0])
-        self.live_board = Board(canvases[1])
+        self.live_board = LiveBoard(canvases[1])
         self.black_board = AnalysisBoard(canvases[2])
 
         # --- Player controls ---
@@ -42,11 +42,14 @@ class GameManager:
         controls_bar = tk.Frame(self._root, height=50)
         controls_bar.pack(side="top", fill="x", pady=PADDING, padx=PADDING)
         controls_bar.grid_propagate(False)
-        for i in range(5):
-            controls_bar.grid_columnconfigure(i, weight=2 if i%4==0 else 1)
+        for i in range(6):
+            controls_bar.grid_columnconfigure(i, weight=2 if i%5==0 else 1)
 
         self.undo_btn = ttk.Button(controls_bar, text="Undo 1 Ply")
         self.undo_btn.grid(row=0, column=2)
+
+        self.reset_btn = ttk.Button(controls_bar, text="Reset Board")
+        self.reset_btn.grid(row=0, column=3)
 
         self.white_combo = ttk.Combobox(controls_bar, values=player_names,
                                         state="readonly", width=25)
@@ -57,11 +60,11 @@ class GameManager:
         self.white_btn.grid(row=0, column=1)
 
         self.black_btn = ttk.Button(controls_bar, text="Trigger Black Bot")
-        self.black_btn.grid(row=0, column=3)
+        self.black_btn.grid(row=0, column=4)
 
         self.black_combo = ttk.Combobox(controls_bar, values=player_names,
                                     state="readonly", width=25)
-        self.black_combo.grid(row=0, column=4, padx=PADDING)
+        self.black_combo.grid(row=0, column=5, padx=PADDING)
         self.black_combo.current(0)
 
         # --- Read-only scrolling text boxes for logging ---
@@ -116,7 +119,8 @@ class GameManager:
 
 
     def begin(self):
-        self.undo_btn.bind("<Button-1>", self.undo_ply, add="+")
+        self.undo_btn.bind("<Button-1>", self.undo_ply)
+        self.reset_btn.bind("<Button-1>", self.reset)
         self.white_combo.bind("<<ComboboxSelected>>", self.set_white)
         self.black_combo.bind("<<ComboboxSelected>>", self.set_black)
         self._root.mainloop()
@@ -127,6 +131,11 @@ class GameManager:
         if self.live_board.ply() > 0:
             self.live_board.pop()
             self.live_board.render()
+
+
+    def reset(self, event):
+        self.live_board.reset()
+        self.live_board.render()
 
 
     def set_white(self, event):

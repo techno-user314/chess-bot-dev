@@ -8,12 +8,40 @@ SQUARE_SIZE = 54
 LIGHT_SQ = "#F0D9B5"
 DARK_SQ = "#B58863"
 
+
 class Board(chess.Board):
+    def __init__(self):
+        super().__init__()
+
+    def material_count(self, piece_values=None):
+        if piece_values is None:
+            piece_values = {chess.PAWN: 1,
+                            chess.KNIGHT: 2.5,
+                            chess.BISHOP: 3,
+                            chess.ROOK: 5,
+                            chess.QUEEN: 10}
+        white_mat_count = 0
+        black_mat_count = 0
+        for piece_type in piece_values.keys():
+            piece_squares = self.pieces(piece_type, chess.WHITE)
+            white_mat_count += piece_values[piece_type] * len(piece_squares)
+            piece_squares = self.pieces(piece_type, chess.BLACK)
+            black_mat_count += piece_values[piece_type] * len(piece_squares)
+        return {chess.WHITE:white_mat_count, chess.BLACK:black_mat_count}
+
+
+class LiveBoard(Board):
     def __init__(self, canvas):
         super().__init__()
         self.surface = canvas
         self.selected_square = None
+        self.on_move_callback = on_move_callback
         self.render()
+
+    def play_move(self, move):
+        if move in self.legal_moves:
+            self.push(move)
+            self.render()
 
     def render(self):
         # Draw the board and pieces
@@ -80,12 +108,8 @@ class Board(chess.Board):
                         stipple="gray50"
                     )
 
-    def play_move(self, move):
-        if move in self.legal_moves:
-            self.push(move)
-            self.render()
 
-class AnalysisBoard(Board):
+class AnalysisBoard(LiveBoard):
     def __init__(self, canvas):
         super().__init__(canvas)
         self.scores = {}
@@ -107,13 +131,16 @@ class AnalysisBoard(Board):
                     row = 7 - chess.square_rank(move.to_square)
 
                     # Render the score for this move
+                    clamped_score = max(-3, min(3, self.scores[move.uci()]))
+                    color = "#{:02x}{:02x}00".format(int(255 * (1 - clamped_score / 3) / 2),
+                                                     int(255 * (1 + clamped_score / 3) / 2))
                     self.surface.create_text(
                         col * SQUARE_SIZE + 16,
                         row * SQUARE_SIZE + 12,
                         text=self.scores[move.uci()],
                         font=("Helvetica", 12, "bold"),
-                        fill="yellow"
+                        fill=color
                     )
-    
+
     def play_move(self, move):
         pass

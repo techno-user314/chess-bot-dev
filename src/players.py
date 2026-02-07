@@ -1,12 +1,7 @@
 from random import choice as pick_from
 import chess
-from boards import SQUARE_SIZE
+from boards import SQUARE_SIZE, Board
 
-PIECE_VALUES = {chess.PAWN:1,
-                chess.KNIGHT:2.5,
-                chess.BISHOP:3,
-                chess.ROOK:5,
-                chess.QUEEN:10}
 BOT_DEPTH_PLY = 2
 
 
@@ -65,6 +60,7 @@ class Bot(Player):
         self.analysis_board = analysis_board
 
         self.move_scores = {}
+        self._last_score = 0
         self._search_calls = 0
 
     # --- Event response ---
@@ -95,7 +91,8 @@ class Bot(Player):
 
     def play_best_move(self):
         self.move_scores = {}
-        test_board = chess.Board(self.play_board.fen())
+        test_board = Board()
+        test_board.set_fen(self.play_board.fen())
         self._search_calls = 0
         for move in self.play_board.legal_moves:
             score = self.get_move_score(move, test_board, BOT_DEPTH_PLY)
@@ -119,25 +116,18 @@ class Bot(Player):
         self.log(alog_text, True)
 
         # Sync the analysis board with the current position minus last move
+        relative_scores = {move: score - self._last_score
+                           for move, score in self.move_scores.items()}
         self.analysis_board.set_fen(self.play_board.fen())
-        self.analysis_board.set_scores(self.move_scores)
+        self.analysis_board.set_scores(relative_scores)
         self.analysis_board.selected_square = best_move.from_square
         self.analysis_board.render()
 
+        self._last_score = best_move_score
         self.play_board.play_move(best_move)
-
-    # --- Helper functions ---
-    def material_count(self, board_pos, for_opponent=False):
-        for_color = not self.color if for_opponent else self.color
-        mat_count = 0
-        for piece_type in PIECE_VALUES.keys():
-            piece_squares = board_pos.pieces(piece_type, for_color)
-            mat_count += PIECE_VALUES[piece_type] * len(piece_squares)
-        return mat_count
 
     # --- Position scoring logic ---
     # Override this method to customize the bot
     def evaluate_pos(self, board):
-        my_mat = self.material_count(board)
-        other_mat = self.material_count(board, for_opponent=True)
-        return my_mat - other_mat
+        mat = board.material_count()
+        return mat[self.color] - mat[not self.color]
