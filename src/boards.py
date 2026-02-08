@@ -1,4 +1,5 @@
 import chess
+import tkinter as tk
 
 PIECES = {
     'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔',
@@ -31,11 +32,27 @@ class Board(chess.Board):
 
 
 class LiveBoard(Board):
-    def __init__(self, canvas):
+    def __init__(self, parent, size, col, label=("Live Board", 25), padding=0):
         super().__init__()
-        self.surface = canvas
         self.selected_square = None
-        self.on_move_callback = on_move_callback
+
+        # --- Rendering ---
+        frame = tk.Frame(parent)
+        frame.grid(row=0, column=col, padx=padding, pady=padding)
+
+        label = tk.Label(
+            frame, text=label[0],
+            anchor="center",
+            font=("Arial", label[1])
+        )
+        label.grid(row=0, column=0, padx=padding)
+
+        self.surface = tk.Canvas(
+            frame, width=size, height=size,
+            bg="lightgray", highlightthickness=1, highlightbackground="black"
+        )
+        self.surface.grid(row=1, column=0, padx=padding)
+
         self.render()
 
     def play_move(self, move):
@@ -110,8 +127,8 @@ class LiveBoard(Board):
 
 
 class AnalysisBoard(LiveBoard):
-    def __init__(self, canvas):
-        super().__init__(canvas)
+    def __init__(self, parent, size, row, label=("Analysis Board", 13), padding=0):
+        super().__init__(parent, size, row, label, padding)
         self.scores = {}
 
     def set_scores(self, move_scores):
