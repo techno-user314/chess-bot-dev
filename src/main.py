@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-from boards import LiveBoard, AnalysisBoard
+from boards import LiveBoard, AnalysisBoard, SQUARE_SIZE
 from players import HumanPlayer
 from bot_loader import get_bots
 from ui_helper import *
 
-BOARD_SIZE = 432 # Board display size in pixels
+BOARD_SIZE = SQUARE_SIZE * 8 # Board display size in pixels
 LOG_SIZE = (BOARD_SIZE * 3, 320)
 PADDING = 5
 
@@ -22,18 +22,12 @@ class GameManager:
         self._root.resizable(False, False)
 
         # --- Boards ---
-        canvas_frame = tk.Frame(self._root)
-        canvas_frame.pack(padx=PADDING, pady=PADDING)
+        board_frame = tk.Frame(self._root)
+        board_frame.pack(padx=PADDING, pady=PADDING)
 
-        ui_label(canvas_frame, "White Analysis", 13, column=0)
-        ui_label(canvas_frame, "Live Board", 25, column=1)
-        ui_label(canvas_frame, "Black Analysis", 13, column=2)
-        canvases = [ui_square_canvas(canvas_frame, BOARD_SIZE,
-                                     row=1, column=i, padding=PADDING)
-                    for i in range(3)]
-        self.white_board = AnalysisBoard(canvases[0])
-        self.live_board = LiveBoard(canvases[1])
-        self.black_board = AnalysisBoard(canvases[2])
+        self.white_board = AnalysisBoard(board_frame, BOARD_SIZE, 0, padding=PADDING)
+        self.live_board = LiveBoard(board_frame, BOARD_SIZE, 1, padding=PADDING)
+        self.black_board = AnalysisBoard(board_frame, BOARD_SIZE, 2, padding=PADDING)
 
         # --- Player controls ---
         self._bots = get_bots()
