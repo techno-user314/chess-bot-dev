@@ -1,4 +1,7 @@
+import math
+
 import chess
+import tkinter as tk
 
 PIECES = {
     'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔',
@@ -31,16 +34,70 @@ class Board(chess.Board):
 
 
 class LiveBoard(Board):
-    def __init__(self, canvas):
+    def __init__(self, parent, size, col, label=("Live Board", 25), padding=0):
         super().__init__()
-        self.surface = canvas
         self.selected_square = None
+        self.size = size
+        self.eval_height = label[1]
+
+        # --- Rendering ---
+        frame = tk.Frame(parent)
+        frame.grid(row=0, column=col, padx=padding, pady=padding)
+
+        tk.Label(
+            frame, text=label[0],
+            anchor="center",
+            font=("Arial", label[1])
+        ).grid(row=0, column=0, padx=padding)
+
+        self.surface = tk.Canvas(
+            frame, width=self.size, height=self.size,
+            bg="lightgray", highlightthickness=1, highlightbackground="black"
+        )
+        self.surface.grid(row=1, column=0, padx=padding)
+
+        self.eval_canvas = tk.Canvas(frame,
+                                     width=self.size,
+                                     height=label[1],
+                                     bg="black",
+                                     highlightthickness=1,
+                                     highlightbackground="gray")
+        self.eval_canvas.grid()
+        self.eval_fill = self.eval_canvas.create_rectangle(0, 0, 0, self.eval_height,
+                                                           fill="white", outline="")
+        self.eval_text = self.eval_canvas.create_text(self.size // 2,
+                                                      self.eval_height // 2,
+                                                      text=" ", fill="white")
+
         self.render()
 
     def play_move(self, move):
         if move in self.legal_moves:
             self.push(move)
+            mat = self.material_count()
+            self.set_eval_bar(mat[chess.WHITE] - mat[chess.BLACK])
             self.render()
+
+    def set_eval_bar(self, evaluation):
+        fill_percent = 1 - (0.519615 * math.pow(0.832683, evaluation))
+        fill_percent = max(0, min(1, fill_percent))
+
+        self.eval_canvas.coords(self.eval_fill,
+                                0, 0,
+                                int(self.size * fill_percent),
+                                self.eval_height)
+        text = "      ±0"
+        if evaluation > 0:
+            text = f"+{abs(evaluation)}      "
+        elif evaluation < 0:
+            text = f"      -{abs(evaluation)}"
+        text_color = "black" if evaluation > 0 else "white"
+        self.eval_canvas.itemconfig(self.eval_text, text=text)
+        self.eval_canvas.itemconfig(self.eval_text, fill=text_color)
+
+    def reset_game(self):
+        super().reset()
+        self.set_eval_bar(0)
 
     def render(self):
         # Draw the board and pieces
@@ -109,8 +166,8 @@ class LiveBoard(Board):
 
 
 class AnalysisBoard(LiveBoard):
-    def __init__(self, canvas):
-        super().__init__(canvas)
+    def __init__(self, parent, size, row, label=("Analysis Board", 13), padding=0):
+        super().__init__(parent, size, row, label, padding)
         self.scores = {}
 
     def set_scores(self, move_scores):
