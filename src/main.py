@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
 
-from boards import LiveBoard, AnalysisBoard
+from boards import LiveBoard, AnalysisBoard, SQUARE_SIZE
 from players import HumanPlayer
 from bot_loader import get_bots
 from ui_helper import *
 
-BOARD_SIZE = 432 # Board display size in pixels
+BOARD_SIZE = SQUARE_SIZE * 8 # Board display size in pixels
 LOG_SIZE = (BOARD_SIZE * 3, 320)
 PADDING = 5
 
