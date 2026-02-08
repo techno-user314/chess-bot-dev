@@ -1,3 +1,5 @@
+import math
+
 import chess
 import tkinter as tk
 
@@ -35,30 +37,49 @@ class LiveBoard(Board):
     def __init__(self, parent, size, col, label=("Live Board", 25), padding=0):
         super().__init__()
         self.selected_square = None
+        self.size = size
+        self.eval_height = label[1]
 
         # --- Rendering ---
         frame = tk.Frame(parent)
         frame.grid(row=0, column=col, padx=padding, pady=padding)
 
-        label = tk.Label(
+        tk.Label(
             frame, text=label[0],
             anchor="center",
             font=("Arial", label[1])
-        )
-        label.grid(row=0, column=0, padx=padding)
+        ).grid(row=0, column=0, padx=padding)
 
         self.surface = tk.Canvas(
-            frame, width=size, height=size,
+            frame, width=self.size, height=self.size,
             bg="lightgray", highlightthickness=1, highlightbackground="black"
         )
         self.surface.grid(row=1, column=0, padx=padding)
+
+        self.eval_canvas = tk.Canvas(frame,
+                                     width=self.size,
+                                     height=label[1],
+                                     bg="black",
+                                     highlightthickness=1,
+                                     highlightbackground="gray")
+        self.eval_canvas.grid()
+        self.eval_fill = self.eval_canvas.create_rectangle(0, 0, 0, self.eval_height,
+                                                           fill="white", outline="")
+        self.eval_text = self.eval_canvas.create_text(self.size // 2,
+                                                      self.eval_height // 2,
+                                                      text=" ", fill="white")
 
         self.render()
 
     def play_move(self, move):
         if move in self.legal_moves:
             self.push(move)
+            mat = self.material_count()
+            self.set_eval_bar(mat[chess.WHITE] - mat[chess.BLACK])
             self.render()
+
+    def set_eval_bar(self, evaluation):
+        pass
 
     def render(self):
         # Draw the board and pieces
