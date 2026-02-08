@@ -128,7 +128,7 @@ class GameManager:
 
 
     def reset(self, event):
-        self.live_board.reset()
+        self.live_board.reset_game()
         self.live_board.render()
 
 
