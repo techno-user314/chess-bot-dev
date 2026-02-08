@@ -79,7 +79,25 @@ class LiveBoard(Board):
             self.render()
 
     def set_eval_bar(self, evaluation):
-        pass
+        fill_percent = 1 - (0.519615 * math.pow(0.832683, evaluation))
+        fill_percent = max(0, min(1, fill_percent))
+
+        self.eval_canvas.coords(self.eval_fill,
+                                0, 0,
+                                int(self.size * fill_percent),
+                                self.eval_height)
+        text = "      ±0"
+        if evaluation > 0:
+            text = f"+{abs(evaluation)}      "
+        elif evaluation < 0:
+            text = f"      -{abs(evaluation)}"
+        text_color = "black" if evaluation > 0 else "white"
+        self.eval_canvas.itemconfig(self.eval_text, text=text)
+        self.eval_canvas.itemconfig(self.eval_text, fill=text_color)
+
+    def reset_game(self):
+        super().reset()
+        self.set_eval_bar(0)
 
     def render(self):
         # Draw the board and pieces
