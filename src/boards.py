@@ -7,7 +7,6 @@ PIECES = {
     'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔',
     'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚'
 }
-SQUARE_SIZE = 54
 LIGHT_SQ = "#F0D9B5"
 DARK_SQ = "#B58863"
 
@@ -34,10 +33,17 @@ class Board(chess.Board):
 
 
 class LiveBoard(Board):
-    def __init__(self, parent, size, col, label=("Live Board", 25), padding=0):
+    def __init__(self,
+                 parent,
+                 square_size,
+                 col,
+                 label=("Live Board", 25),
+                 padding=0
+        ):
         super().__init__()
         self.selected_square = None
-        self.size = size
+        self.size = square_size * 8
+        self.square_size = square_size
         self.eval_height = label[1]
 
         # --- Rendering ---
@@ -105,10 +111,10 @@ class LiveBoard(Board):
         for row in range(8):
             for col in range(8):
                 self.surface.create_rectangle(
-                    col * SQUARE_SIZE,
-                    row * SQUARE_SIZE,
-                    col * SQUARE_SIZE + SQUARE_SIZE,
-                    row * SQUARE_SIZE + SQUARE_SIZE,
+                    col * self.square_size,
+                    row * self.square_size,
+                    col * self.square_size + self.square_size,
+                    row * self.square_size + self.square_size,
                     fill=LIGHT_SQ if (row + col) % 2 != 0 else DARK_SQ,
                     outline=""
                 )
@@ -116,8 +122,8 @@ class LiveBoard(Board):
                 piece = self.piece_at(square)
                 if piece:
                     self.surface.create_text(
-                        col * SQUARE_SIZE + SQUARE_SIZE // 2,
-                        row * SQUARE_SIZE + SQUARE_SIZE // 2,
+                        col * self.square_size + self.square_size // 2,
+                        row * self.square_size + self.square_size // 2,
                         text=PIECES[piece.symbol()],
                         font=("Arial", 36)
                     )
@@ -126,10 +132,10 @@ class LiveBoard(Board):
             col = chess.square_file(self.selected_square)
             row = 7 - chess.square_rank(self.selected_square)
             self.surface.create_rectangle(
-                col * SQUARE_SIZE,
-                row * SQUARE_SIZE,
-                (col + 1) * SQUARE_SIZE,
-                (row + 1) * SQUARE_SIZE,
+                col * self.square_size,
+                row * self.square_size,
+                (col + 1) * self.square_size,
+                (row + 1) * self.square_size,
                 outline="#444444",
                 width=3
             )
@@ -143,11 +149,11 @@ class LiveBoard(Board):
                 col = chess.square_file(move.to_square)
                 row = 7 - chess.square_rank(move.to_square)
 
-                cx = col * SQUARE_SIZE + SQUARE_SIZE // 2
-                cy = row * SQUARE_SIZE + SQUARE_SIZE // 2
+                cx = col * self.square_size + self.square_size // 2
+                cy = row * self.square_size + self.square_size // 2
 
                 if self.piece_at(move.to_square):
-                    r = SQUARE_SIZE // 3
+                    r = self.square_size // 3
                     self.surface.create_oval(
                         cx - r, cy - r,
                         cx + r, cy + r,
@@ -155,7 +161,7 @@ class LiveBoard(Board):
                         width=2,
                     )
                 else:
-                    r = SQUARE_SIZE // 10
+                    r = self.square_size // 10
                     self.surface.create_oval(
                         cx - r, cy - r,
                         cx + r, cy + r,
@@ -166,8 +172,14 @@ class LiveBoard(Board):
 
 
 class AnalysisBoard(LiveBoard):
-    def __init__(self, parent, size, row, label=("Analysis Board", 13), padding=0):
-        super().__init__(parent, size, row, label, padding)
+    def __init__(self,
+                 parent,
+                 square_size,
+                 row,
+                 label=("Analysis Board", 13),
+                 padding=0
+        ):
+        super().__init__(parent, square_size, row, label, padding)
         self.scores = {}
 
     def set_scores(self, move_scores):
@@ -191,8 +203,8 @@ class AnalysisBoard(LiveBoard):
                     color = "#{:02x}{:02x}00".format(int(255 * (1 - clamped_score / 3) / 2),
                                                      int(255 * (1 + clamped_score / 3) / 2))
                     self.surface.create_text(
-                        col * SQUARE_SIZE + 16,
-                        row * SQUARE_SIZE + 12,
+                        col * self.square_size + 16,
+                        row * self.square_size + 12,
                         text=self.scores[move.uci()],
                         font=("Helvetica", 12, "bold"),
                         fill=color
