@@ -1,6 +1,6 @@
 from random import choice as pick_from
 import chess
-from boards import SQUARE_SIZE, Board
+from boards import Board
 
 BOT_DEPTH_PLY = 2
 
@@ -33,8 +33,8 @@ class Player:
         pass
 
     def click_board(self, board, click_x, click_y):
-        col = click_x // SQUARE_SIZE
-        row = click_y // SQUARE_SIZE
+        col = int(click_x // board.square_size)
+        row = int(click_y // board.square_size)
         square = chess.square(col, 7 - row)
         piece = board.piece_at(square)
         piece = piece if piece and piece.color == self.color else None
