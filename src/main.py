@@ -1,15 +1,23 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter.scrolledtext import ScrolledText
 
 from boards import LiveBoard, AnalysisBoard
 from players import HumanPlayer
 from bot_loader import get_bots
-from ui_helper import *
 
 SQUARE_SIZE = 54
 BOARD_SIZE = SQUARE_SIZE * 8 # Board display size in pixels
 LOG_SIZE = (BOARD_SIZE * 3, 320)
 PADDING = 5
+
+
+def ui_text_box(parent, row=0, column=0):
+    tbox = ScrolledText(parent, wrap=tk.WORD)
+    tbox.grid(row=row, column=column, sticky="nsew")
+    tbox.configure(state="disabled")
+    return tbox
+
 
 class GameManager:
     def __init__(self):
