@@ -42,7 +42,7 @@ class LiveBoard(Board):
         ):
         super().__init__()
         self.selected_square = None
-        self.size = square_size * 8
+        self.size = int(square_size * 8)
         self.square_size = square_size
         self.eval_height = label[1]
 
@@ -69,7 +69,10 @@ class LiveBoard(Board):
                                      highlightthickness=1,
                                      highlightbackground="gray")
         self.eval_canvas.grid()
-        self.eval_fill = self.eval_canvas.create_rectangle(0, 0, 0, self.eval_height,
+        self.eval_fill = self.eval_canvas.create_rectangle(0,
+                                                           0,
+                                                           self.size/2,
+                                                           self.eval_height,
                                                            fill="white", outline="")
         self.eval_text = self.eval_canvas.create_text(self.size // 2,
                                                       self.eval_height // 2,
@@ -175,11 +178,11 @@ class AnalysisBoard(LiveBoard):
     def __init__(self,
                  parent,
                  square_size,
-                 row,
+                 col,
                  label=("Analysis Board", 13),
                  padding=0
         ):
-        super().__init__(parent, square_size, row, label, padding)
+        super().__init__(parent, square_size, col, label, padding)
         self.scores = {}
 
     def set_scores(self, move_scores):
