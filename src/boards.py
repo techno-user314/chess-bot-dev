@@ -36,39 +36,31 @@ class LiveBoard(Board):
     def __init__(self,
                  parent,
                  square_size,
-                 col,
-                 label=("Live Board", 25),
                  padding=0
         ):
         super().__init__()
         self.selected_square = None
         self.size = int(square_size * 8)
         self.square_size = square_size
-        self.eval_height = label[1]
+        self.eval_height = padding
 
         # --- Rendering ---
         frame = tk.Frame(parent)
-        frame.grid(row=0, column=col, padx=padding, pady=padding)
-
-        tk.Label(
-            frame, text=label[0],
-            anchor="center",
-            font=("Arial", label[1])
-        ).grid(row=0, column=0, padx=padding)
+        frame.grid(row=1, column=0, padx=padding, pady=padding)
 
         self.surface = tk.Canvas(
             frame, width=self.size, height=self.size,
             bg="lightgray", highlightthickness=1, highlightbackground="black"
         )
-        self.surface.grid(row=1, column=0, padx=padding)
+        self.surface.grid(row=0, column=0, padx=padding)
 
         self.eval_canvas = tk.Canvas(frame,
                                      width=self.size,
-                                     height=label[1],
+                                     height=self.eval_height,
                                      bg="black",
                                      highlightthickness=1,
                                      highlightbackground="gray")
-        self.eval_canvas.grid()
+        self.eval_canvas.grid(row=1, column=0)
         self.eval_fill = self.eval_canvas.create_rectangle(0,
                                                            0,
                                                            self.size/2,
@@ -178,11 +170,9 @@ class AnalysisBoard(LiveBoard):
     def __init__(self,
                  parent,
                  square_size,
-                 col,
-                 label=("Analysis Board", 13),
                  padding=0
         ):
-        super().__init__(parent, square_size, col, label, padding)
+        super().__init__(parent, square_size, padding)
         self.scores = {}
 
     def set_scores(self, move_scores):
